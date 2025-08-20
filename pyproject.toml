@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "few-shot-exemplar-utils"
+version = "0.1.0"
+description = "Utilities for building and validating few-shot LLM prompts using exemplars"
+readme = "docs/README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "langchain>=0.1.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["langchain-openai>=0.1.0"]
