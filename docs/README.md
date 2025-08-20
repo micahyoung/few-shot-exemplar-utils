@@ -4,10 +4,16 @@ Few-shot LLM prompts using curated exemplars is a powerful prompt-engineering te
 
 The goal of these tools are to simplify operationalizing these techniques with common libraries and use-cases.
 
+## Installation
+
+```bash
+pip install few-shot-exemplar-utils
+```
+
 ## Langchain `FewShotPromptTemplateBuilder`
 
 ### Requirements
-- `OPENAI_API_KEY` key (or pass `openai_client` option)
+- `OPENAI_API_KEY` key (or pass an `llm` option to `replay_consistency`)
 
 ### Usage
 
@@ -15,10 +21,9 @@ The goal of these tools are to simplify operationalizing these techniques with c
 from few_shot_exemplars.langchain import FewShotPromptTemplateBuilder
 from langchain.prompts import PromptTemplate
 
-
 example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
 
-[
+examples = [
     {
         "question": "Who lived longer, Muhammad Ali or Alan Turing?",
         "answer": "Muhammad Ali (74) 🇺🇸",
@@ -36,7 +41,7 @@ prompt_builder = FewShotPromptTemplateBuilder(
     input_variables=["input"],
 )
 
-result = prompt_builder.replay_consistency(num=3)
+result = prompt_builder.replay_consistency()
 print(result)
 ```
 
