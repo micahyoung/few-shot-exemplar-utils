@@ -123,4 +123,4 @@ def test_ablation_test_no_dependency():
     validator = ExemplarValidator(prompt, llm)
 
     diff = validator.ablation_test()
-    assert diff == ""  # No differences, so empty string
+    assert "(identical)" in diff  # Should show identical result

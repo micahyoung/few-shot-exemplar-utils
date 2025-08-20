@@ -18,33 +18,50 @@ class ExemplarValidator:
         self.llm = llm
         self.examples = examples or prompt.examples
 
+    def _get_prompt_prefix(self) -> str:
+        """Extract the prompt prefix for cleaning LLM responses."""
+        example_question_key = "question"
+        example_answer_key = "answer"
+        return self.prompt.example_prompt.template.split(f"{{{example_question_key}}}")[1].strip().split(f"{{{example_answer_key}}}")[0]
+    
+    def _invoke_llm(self, prompt: FewShotPromptTemplate, question: str) -> str:
+        """Invoke the LLM with a given prompt and question, returning cleaned response."""
+        prompt_input_key = "input"
+        prompt_prefix = self._get_prompt_prefix()
+        chain = prompt | self.llm
+        return chain.invoke({prompt_input_key: question}).content.strip().replace(prompt_prefix, "")
+    
+    def _create_diff(self, question: str, expected: str, actual: str) -> str:
+        """Create a diff string for answers."""
+        if expected == actual:
+            return "\n".join([
+                f"# Q: {question}", 
+                "# (identical)"
+            ])
+
+        return "\n".join([
+            f"# Q: {question}",
+            f"- {expected}",
+            f"+ {actual}",
+        ])
+
     def replay_test(self) -> str:
-        """Replay examples and show diffs for inconsistent answers.
+        """Replay examples and show diffs for all answers.
 
         Returns:
-            A diff-style string highlighting mismatched answers. If all examples
-            match, an empty string is returned.
+            A diff-style string showing all examples. Identical answers are marked
+            as "(identical)", mismatched answers show the diff.
         """
         example_question_key = "question"
         example_answer_key = "answer"
-        prompt_input_key = "input"
-        prompt_prefix = self.prompt.example_prompt.template.split(f"{{{example_question_key}}}")[1].strip().split(f"{{{example_answer_key}}}")[0]
 
         diffs: List[str] = []
         for example in self.examples:
             question = example[example_question_key]
-            chain = self.prompt | self.llm
-            actual = chain.invoke({prompt_input_key: question}).content.strip().replace(prompt_prefix, "")
+            actual = self._invoke_llm(self.prompt, question)
             expected = str(example[example_answer_key]).strip()
-            if actual != expected:
-                diff = "\n".join(
-                    [
-                        f"# Q: {question}",
-                        f"- {expected}",
-                        f"+ {actual}",
-                    ]
-                )
-                diffs.append(diff)
+            diff = self._create_diff(question, expected, actual)
+            diffs.append(diff)
         return "\n\n".join(diffs)
 
     def ablation_test(self) -> str:
@@ -54,13 +71,11 @@ class ExemplarValidator:
         if the LLM still gives the same answer for that example's question.
         
         Returns:
-            A diff-style string showing examples where removing the example
-            changed the answer. If all examples are consistent, returns empty string.
+            A diff-style string showing all examples. Identical answers are marked
+            as "(identical)", changed answers show the diff.
         """
         example_question_key = "question"
         example_answer_key = "answer"
-        prompt_input_key = "input"
-        prompt_prefix = self.prompt.example_prompt.template.split(f"{{{example_question_key}}}")[1].strip().split(f"{{{example_answer_key}}}")[0]
         
         diffs: List[str] = []
         for i, example in enumerate(self.examples):
@@ -80,18 +95,10 @@ class ExemplarValidator:
             original_answer = str(example[example_answer_key]).strip()
             
             # Test with the ablated prompt
-            chain = ablated_prompt | self.llm
-            ablated_answer = chain.invoke({prompt_input_key: question}).content.strip().replace(prompt_prefix, "")
+            ablated_answer = self._invoke_llm(ablated_prompt, question)
             
-            if ablated_answer != original_answer:
-                diff = "\n".join(
-                    [
-                        f"# Q: {question}",
-                        f"- {original_answer}",
-                        f"+ {ablated_answer}",
-                    ]
-                )
-                diffs.append(diff)
+            diff = self._create_diff(question, original_answer, ablated_answer)
+            diffs.append(diff)
         
         return "\n\n".join(diffs)
 
