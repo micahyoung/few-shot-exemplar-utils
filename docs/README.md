@@ -42,9 +42,9 @@ prompt = FewShotPromptTemplate(
 
 llm = ChatOpenAI()
 
-validator = ExemplarValidator(examples, prompt, llm)
+validator = ExemplarValidator(prompt, llm)
 
-result = validator.replay_consistency()
+result = validator.replay_test()
 print(result)
 ```
 

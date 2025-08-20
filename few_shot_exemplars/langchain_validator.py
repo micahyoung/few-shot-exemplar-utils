@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Sequence, Dict, Any
+from typing import List, Optional, Sequence, Dict, Any
 
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
 
@@ -10,15 +10,15 @@ class ExemplarValidator:
     
     def __init__(
         self,
-        examples: Sequence[Dict[str, Any]],
         prompt: FewShotPromptTemplate,
         llm: Any,
+        examples: Optional[Sequence[Dict[str, Any]]] = None,
     ) -> None:
-        self.examples = list(examples)
         self.prompt = prompt
         self.llm = llm
+        self.examples = examples or prompt.examples
 
-    def replay_consistency(self) -> str:
+    def replay_test(self) -> str:
         """Replay examples and show diffs for inconsistent answers.
 
         Returns:

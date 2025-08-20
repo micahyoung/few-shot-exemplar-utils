@@ -38,7 +38,7 @@ def test_exemplar_validator_detects_inconsistency():
     llm = mock_llm_func
     validator = ExemplarValidator(examples, prompt, llm)
 
-    diff = validator.replay_consistency()
+    diff = validator.replay_test()
     assert "Tina Turner (83)" in diff
     assert "- Ruby Turner (65)" in diff
 
