@@ -18,15 +18,23 @@ class ExemplarValidator:
         self.llm = llm
         self.examples = examples or prompt.examples
 
+    def _get_example_keys(self) -> tuple[str, str]:
+        """Extract question and answer keys from the examples."""
+        if not self.examples:
+            raise ValueError("No examples available to extract keys from")
+        
+        first_example = self.examples[0]
+        keys = list(first_example.keys())
+        return keys[0], keys[1]
+    
     def _get_prompt_prefix(self) -> str:
         """Extract the prompt prefix for cleaning LLM responses."""
-        example_question_key = "question"
-        example_answer_key = "answer"
+        example_question_key, example_answer_key = self._get_example_keys()
         return self.prompt.example_prompt.template.split(f"{{{example_question_key}}}")[1].strip().split(f"{{{example_answer_key}}}")[0]
     
     def _invoke_llm(self, prompt: FewShotPromptTemplate, question: str) -> str:
         """Invoke the LLM with a given prompt and question, returning cleaned response."""
-        prompt_input_key = "input"
+        prompt_input_key = prompt.input_variables[0]
         prompt_prefix = self._get_prompt_prefix()
         chain = prompt | self.llm
         return chain.invoke({prompt_input_key: question}).content.strip().replace(prompt_prefix, "")
@@ -52,8 +60,7 @@ class ExemplarValidator:
             A diff-style string showing all examples. Identical answers are marked
             as "(identical)", mismatched answers show the diff.
         """
-        example_question_key = "question"
-        example_answer_key = "answer"
+        example_question_key, example_answer_key = self._get_example_keys()
 
         diffs: List[str] = []
         for example in self.examples:
@@ -74,8 +81,7 @@ class ExemplarValidator:
             A diff-style string showing all examples. Identical answers are marked
             as "(identical)", changed answers show the diff.
         """
-        example_question_key = "question"
-        example_answer_key = "answer"
+        example_question_key, example_answer_key = self._get_example_keys()
         
         diffs: List[str] = []
         for i, example in enumerate(self.examples):
