@@ -16,12 +16,6 @@ def test_replay_consistency_detects_diff():
         },
     ]
     example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
-    builder = FewShotPromptTemplateBuilder(
-        examples=examples,
-        example_prompt=example_prompt,
-        suffix="Question: {input}",
-        input_variables=["input"],
-    )
 
     class StubLLM:
         def __call__(self, prompt: str) -> str:
@@ -32,7 +26,15 @@ def test_replay_consistency_detects_diff():
             }
             return answers[question]
 
-    diff = builder.replay_consistency(llm=StubLLM())
+    builder = FewShotPromptTemplateBuilder(
+        examples=examples,
+        example_prompt=example_prompt,
+        suffix="Question: {input}",
+        input_variables=["input"],
+        llm=StubLLM(),
+    )
+
+    diff = builder.replay_consistency()
     assert "Tina Turner (83)" in diff
     assert "- Ruby Turner (65)" in diff
 

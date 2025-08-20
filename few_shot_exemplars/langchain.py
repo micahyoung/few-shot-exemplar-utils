@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, List, Sequence, Dict, Any, Optional
+from typing import List, Sequence, Dict, Any, Optional
 
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
 import os
@@ -51,12 +50,10 @@ class FewShotPromptTemplateBuilder:
             return llm(prompt)
         raise ValueError("Unsupported LLM interface")
 
-    def replay_consistency(self, *, llm: Optional[Any] = None, num: int = 1) -> str:
+    def replay_consistency(self, *, num: int = 1) -> str:
         """Replay examples and show diffs for inconsistent answers.
 
         Args:
-            llm: LLM to use. If ``None`` an ``OpenAI`` instance is created using
-                the ``OPENAI_API_KEY`` environment variable.
             num: Unused placeholder for API compatibility. The examples are
                 replayed once.
 
@@ -65,7 +62,7 @@ class FewShotPromptTemplateBuilder:
             match, an empty string is returned.
         """
 
-        llm_to_use = llm or self._llm
+        llm_to_use = self._llm
         if llm_to_use is None:
             from langchain.llms import OpenAI
 

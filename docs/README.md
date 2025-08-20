@@ -13,7 +13,7 @@ pip install few-shot-exemplar-utils
 ## Langchain `FewShotPromptTemplateBuilder`
 
 ### Requirements
-- `OPENAI_API_KEY` key (or pass an `llm` option to `replay_consistency`)
+- `OPENAI_API_KEY` key (or pass an `llm` to `FewShotPromptTemplateBuilder`)
 
 ### Usage
 
