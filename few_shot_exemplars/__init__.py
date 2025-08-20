@@ -1,4 +1,4 @@
 """Utilities for working with few-shot exemplars."""
-from .langchain import FewShotPromptTemplateBuilder
+from .langchain_exemplars import ExemplarValidator
 
-__all__ = ["FewShotPromptTemplateBuilder"]
+__all__ = ["ExemplarValidator"]

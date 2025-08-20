@@ -18,50 +18,40 @@ pip install few-shot-exemplar-utils
 ### Usage
 
 ```python
-from few_shot_exemplars.langchain import FewShotPromptTemplateBuilder
-from langchain.prompts import PromptTemplate
+from few_shot_exemplars.langchain_exemplars import ExemplarValidator
+from langchain.prompts import PromptTemplate, FewShotPromptTemplate
+from langchain_openai import ChatOpenAI
 
-example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
+example_prompt = PromptTemplate.from_template("Q: {question}\nA: {answer}")
 
 examples = [
     {
-        "question": "Who lived longer, Muhammad Ali or Alan Turing?",
-        "answer": "Muhammad Ali (74) 🇺🇸",
+        "question": "Who died younger, Muhammad Ali or Alan Turing?",
+        "answer": "Alan Turing 🏴󠁧󠁢󠁥󠁮󠁧󠁿: 41 years old",
     },
     {
         "question": "Who lived longer, Tina Turner or Ruby Turner?",
-        "answer": "Ruby Turner (65) 🇯🇲",
+        "answer": "Tina Turner 🇺🇸: 100 years old",
     }
 ]
 
-prompt_builder = FewShotPromptTemplateBuilder(
+prompt = FewShotPromptTemplate(
     examples=examples,
     example_prompt=example_prompt,
-    suffix="Question: {input}",
+    prefix="Return your best guess, without explanation",
+    suffix="Q: {input}",
     input_variables=["input"],
 )
 
-result = prompt_builder.replay_consistency()
+validator = ExemplarValidator(examples, prompt, llm)
+
+result = validator.replay_consistency()
 print(result)
 ```
 
 Output
 ```diff
 # Q: Who lived longer, Tina Turner or Ruby Turner?
-- Ruby Turner (65) 🇯🇲
-+ Tina Turner (83) 🇺🇸
-```
-
-Then use the prompt normally:
-```python
-prompt = prompt_builder.prompt
-
-print(
-    prompt.invoke({"input": "Who outlived who: Robin or Maurice Gibb?"}).to_string()
-)
-```
-
-Output
-```text
-Robin Gibb (62) 🇬🇧
+- Tina Turner 🇺🇸: 100 years old
++ Tina Turner 🇺🇸: 83 years old
 ```

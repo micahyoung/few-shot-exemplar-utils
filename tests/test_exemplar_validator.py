@@ -1,10 +1,10 @@
 import pytest
-from langchain.prompts import PromptTemplate
+from langchain.prompts import PromptTemplate, FewShotPromptTemplate
 
-from few_shot_exemplars.langchain import FewShotPromptTemplateBuilder
+from few_shot_exemplars.langchain_exemplars import ExemplarValidator
 
 
-def test_replay_consistency_detects_diff():
+def test_exemplar_validator_detects_inconsistency():
     examples = [
         {
             "question": "Who lived longer, Muhammad Ali or Alan Turing?",
@@ -17,28 +17,31 @@ def test_replay_consistency_detects_diff():
     ]
     example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
 
-    class StubLLM:
-        def __call__(self, prompt: str) -> str:
-            question = prompt.strip().splitlines()[-1].replace("Question: ", "")
-            answers = {
-                "Who lived longer, Muhammad Ali or Alan Turing?": "Muhammad Ali (74) \U0001F1FA\U0001F1F8",
-                "Who lived longer, Tina Turner or Ruby Turner?": "Tina Turner (83) \U0001F1FA\U0001F1F8",
-            }
-            return answers[question]
-
-    builder = FewShotPromptTemplateBuilder(
+    prompt = FewShotPromptTemplate(
         examples=examples,
         example_prompt=example_prompt,
         suffix="Question: {input}",
         input_variables=["input"],
-        llm=StubLLM(),
     )
 
-    diff = builder.replay_consistency()
+    def mock_llm_func(prompt_dict):
+        class MockResponse:
+            def __init__(self, content):
+                self.content = content
+        
+        formatted_prompt = prompt_dict["input"] if isinstance(prompt_dict, dict) else str(prompt_dict)
+        if "Tina Turner or Ruby Turner" in formatted_prompt:
+            return MockResponse("Tina Turner (83) \U0001F1FA\U0001F1F8")
+        else:
+            return MockResponse("Muhammad Ali (74) \U0001F1FA\U0001F1F8")
+
+    llm = mock_llm_func
+    validator = ExemplarValidator(examples, prompt, llm)
+
+    diff = validator.replay_consistency()
     assert "Tina Turner (83)" in diff
     assert "- Ruby Turner (65)" in diff
 
-    prompt = builder.prompt
     formatted = prompt.format(input="Who outlived who: Robin or Maurice Gibb?")
     assert formatted.strip().endswith(
         "Question: Who outlived who: Robin or Maurice Gibb?"
