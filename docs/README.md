@@ -28,7 +28,7 @@ examples = [
     },
     {
         "question": "Who lived longer, Tina Turner or Ruby Turner?",
-        "answer": "Tina Turner 🇺🇸: 100 years old",
+        "answer": "Tina Turner 🇺🇸: 100 years old", # wrong age
     }
 ]
 
@@ -42,15 +42,39 @@ prompt = FewShotPromptTemplate(
 
 llm = ChatOpenAI()
 
-validator = ExemplarValidator(examples, prompt, llm)
+validator = ExemplarValidator(prompt, llm)
+```
 
-result = validator.replay_consistency()
+#### Replay test
+```python
+
+result = validator.replay_test()
 print(result)
 ```
 
 Output
 ```diff
+# Q: Who died younger, Muhammad Ali or Alan Turing?
+# (identical)
+
 # Q: Who lived longer, Tina Turner or Ruby Turner?
 - Tina Turner 🇺🇸: 100 years old
 + Tina Turner 🇺🇸: 83 years old
 ```
+
+#### Ablation test
+```python
+
+result = validator.ablation_test()
+print(result)
+```
+
+Output
+```diff
+# Q: Who died younger, Muhammad Ali or Alan Turing?
+- Alan Turing 🏴󠁧󠁢󠁥󠁮󠁧󠁿: 41 years old
++ Alan Turing 🇬🇧: 41 years old
+
+# Q: Who lived longer, Tina Turner or Ruby Turner?
+- Tina Turner 🇺🇸: 100 years old
++ Tina Turner 🇺🇸: 83 years old
