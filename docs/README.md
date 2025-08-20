@@ -6,6 +6,9 @@ The goal of these tools are to simplify operationalizing these techniques with c
 
 ## Langchain `FewShotPromptTemplateBuilder`
 
+### Requirements
+- `OPENAI_API_KEY` key (or pass `openai_client` option)
+
 ### Usage
 
 ```python
@@ -33,8 +36,8 @@ prompt_builder = FewShotPromptTemplateBuilder(
     input_variables=["input"],
 )
 
-results = prompt_builder.replay_test(num=3)
-print(results)
+result = prompt_builder.replay_consistency(num=3)
+print(result)
 ```
 
 Output
