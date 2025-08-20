@@ -10,15 +10,12 @@ The goal of these tools are to simplify operationalizing these techniques with c
 pip install few-shot-exemplar-utils
 ```
 
-## Langchain `FewShotPromptTemplateBuilder`
-
-### Requirements
-- `OPENAI_API_KEY` key (or pass an `llm` to `FewShotPromptTemplateBuilder`)
+## Langchain `ExemplarValidator`
 
 ### Usage
 
 ```python
-from few_shot_exemplars.langchain_exemplars import ExemplarValidator
+from few_shot_exemplars.langchain_validator import ExemplarValidator
 from langchain.prompts import PromptTemplate, FewShotPromptTemplate
 from langchain_openai import ChatOpenAI
 
@@ -42,6 +39,8 @@ prompt = FewShotPromptTemplate(
     suffix="Q: {input}",
     input_variables=["input"],
 )
+
+llm = ChatOpenAI()
 
 validator = ExemplarValidator(examples, prompt, llm)
 

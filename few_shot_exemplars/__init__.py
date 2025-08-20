@@ -1,4 +1,4 @@
 """Utilities for working with few-shot exemplars."""
-from .langchain_exemplars import ExemplarValidator
+from .langchain_validator import ExemplarValidator
 
 __all__ = ["ExemplarValidator"]

@@ -1,7 +1,7 @@
 import pytest
 from langchain.prompts import PromptTemplate, FewShotPromptTemplate
 
-from few_shot_exemplars.langchain_exemplars import ExemplarValidator
+from few_shot_exemplars.langchain_validator import ExemplarValidator
 
 
 def test_exemplar_validator_detects_inconsistency():
