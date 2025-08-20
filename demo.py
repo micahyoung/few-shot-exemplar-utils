@@ -15,15 +15,15 @@ examples = [
         "answer": "Robin Gibb 🇬🇧: 62 years old",
     },
     {
-        "question": "Who lived longer, Tina Turner or Ruby Turner?",
-        "answer": "Tina Turner 🇺🇸: 100 years old",
+        "question": "Who lived longer, Tina Turner or Marianne Faithfull?",
+        "answer": "Tina Turner 🇺🇸: 100 years old", # wrong age for demo
     },
 ]
 
 prompt = FewShotPromptTemplate(
     examples=examples,
     example_prompt=example_prompt,
-    prefix="Return your best guess, without explanation",
+    prefix="Return your best guess, name/flag/age, without explanation",
     suffix="Q: {input}",
     input_variables=["input"],
 )
@@ -31,6 +31,7 @@ prompt = FewShotPromptTemplate(
 llm = ChatOpenAI(
     model=os.environ["OPENAI_MODEL"],
     temperature=0.0,
+    extra_body={"reasoning_effort": "minimal"} if os.environ["OPENAI_MODEL"].startswith("gpt-5") else {},
 )
 
 validator = ExemplarValidator(prompt, llm)
