@@ -10,6 +10,7 @@ The goal of these tools are to simplify operationalizing these techniques with c
 
 ```python
 from few_shot_exemplars.langchain import FewShotPromptTemplateBuilder
+from langchain.prompts import PromptTemplate
 
 
 example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
@@ -17,11 +18,11 @@ example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
 [
     {
         "question": "Who lived longer, Muhammad Ali or Alan Turing?",
-        "answer": "Muhammad Ali 🇺🇸",
+        "answer": "Muhammad Ali (74) 🇺🇸",
     },
     {
-        "question": "Who died younger, Tina Turner or Ruby Turner?",
-        "answer": "Ruby Turner 🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        "question": "Who lived longer, Tina Turner or Ruby Turner?",
+        "answer": "Ruby Turner (65) 🇯🇲",
     }
 ]
 
@@ -38,4 +39,21 @@ print(results)
 
 Output
 ```diff
+# Q: Who lived longer, Tina Turner or Ruby Turner?
+- Ruby Turner (65) 🇯🇲
++ Tina Turner (83) 🇺🇸
+```
+
+Then use the prompt normally:
+```python
+prompt = prompt_builder.prompt
+
+print(
+    prompt.invoke({"input": "Who outlived who: Robin or Maurice Gibb?"}).to_string()
+)
+```
+
+Output
+```text
+Robin Gibb (62) 🇬🇧
 ```
