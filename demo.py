@@ -42,11 +42,6 @@ llm = ChatOpenAI(
 
 validator = ExemplarValidator(prompt, llm)
 
-ablation_result = validator.ablation_test()
-print("Ablation test results:")
-print(ablation_result)
-print("\n")
-
 replay_result = validator.replay_test()
 print("Replay test results (original examples):")
 print(replay_result)
@@ -58,5 +53,20 @@ updated_prompt.examples = validator.replay_examples()
 updated_validator = ExemplarValidator(updated_prompt, llm)
 
 updated_replay_result = updated_validator.replay_test()
-print("Replay test results (updated examples):")
+print("Replay test results (replayed examples):")
 print(updated_replay_result)
+print("\n")
+
+ablation_result = validator.ablation_test()
+print("Ablation test results (original examples):")
+print(ablation_result)
+print("\n")
+
+# Generate examples using ablation methodology
+ablated_prompt = prompt.model_copy()
+ablated_prompt.examples = validator.ablation_examples()
+ablated_validator = ExemplarValidator(ablated_prompt, llm)
+
+updated_ablation_result = ablated_validator.ablation_test()
+print("Ablation test results (ablated examples):")
+print(updated_ablation_result)

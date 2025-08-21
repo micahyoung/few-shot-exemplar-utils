@@ -16,13 +16,16 @@ class ExemplarValidator:
     ) -> None:
         self.prompt = prompt
         self.llm = llm
-        self.examples = examples or prompt.examples
+        self.examples = examples or prompt.examples or []
+
+    def _validate_examples(self) -> None:
+        """Validate that examples are available."""
+        if not self.examples:
+            raise ValueError("No examples available")
 
     def _get_example_keys(self) -> tuple[str, str]:
         """Extract question and answer keys from the examples."""
-        if not self.examples:
-            raise ValueError("No examples available to extract keys from")
-
+        self._validate_examples()
         first_example = self.examples[0]
         keys = list(first_example.keys())
         return keys[0], keys[1]
@@ -34,6 +37,20 @@ class ExemplarValidator:
             self.prompt.example_prompt.template.split(f"{{{example_question_key}}}")[1]
             .strip()
             .split(f"{{{example_answer_key}}}")[0]
+        )
+
+    def _create_ablated_prompt(self, exclude_index: int) -> FewShotPromptTemplate:
+        """Create a prompt with the example at exclude_index removed."""
+        self._validate_examples()
+        ablated_examples = [
+            ex for j, ex in enumerate(self.examples) if j != exclude_index
+        ]
+        return FewShotPromptTemplate(
+            examples=ablated_examples,
+            example_prompt=self.prompt.example_prompt,
+            prefix=self.prompt.prefix,
+            suffix=self.prompt.suffix,
+            input_variables=self.prompt.input_variables,
         )
 
     def _invoke_llm(self, prompt: FewShotPromptTemplate, question: str) -> str:
@@ -67,9 +84,6 @@ class ExemplarValidator:
             A diff-style string showing all examples. Identical answers are marked
             as "(identical)", mismatched answers show the diff.
         """
-        if not self.examples:
-            raise ValueError("No examples available for replay test")
-
         example_question_key, example_answer_key = self._get_example_keys()
 
         diffs: List[str] = []
@@ -93,29 +107,12 @@ class ExemplarValidator:
         """
         example_question_key, example_answer_key = self._get_example_keys()
 
-        if not self.examples:
-            raise ValueError("No examples available for ablation test")
-
         diffs: List[str] = []
         for i, example in enumerate(self.examples):
-            # Create a new examples list without the current example
-            ablated_examples = [ex for j, ex in enumerate(self.examples) if j != i]
-
-            # Create a new prompt with the ablated examples
-            ablated_prompt = FewShotPromptTemplate(
-                examples=ablated_examples,
-                example_prompt=self.prompt.example_prompt,
-                prefix=self.prompt.prefix,
-                suffix=self.prompt.suffix,
-                input_variables=self.prompt.input_variables,
-            )
-
+            ablated_prompt = self._create_ablated_prompt(i)
             question = example[example_question_key]
             original_answer = str(example[example_answer_key]).strip()
-
-            # Test with the ablated prompt
             ablated_answer = self._invoke_llm(ablated_prompt, question)
-
             diff = self._create_diff(question, original_answer, ablated_answer)
             diffs.append(diff)
 
@@ -132,9 +129,6 @@ class ExemplarValidator:
         """
         example_question_key, example_answer_key = self._get_example_keys()
 
-        if not self.examples:
-            raise ValueError("No examples available for replay")
-
         replayed_examples: List[Dict[str, Any]] = []
         for example in self.examples:
             question = example[example_question_key]
@@ -146,6 +140,30 @@ class ExemplarValidator:
             replayed_examples.append(replayed_example)
 
         return replayed_examples
+
+    def ablation_examples(self) -> List[Dict[str, Any]]:
+        """Return a new set of examples with answers rewritten through the same mechanism as ablation_test().
+
+        For each example, creates a prompt with that example removed and generates
+        a new answer for that example's question using the ablated prompt.
+
+        Returns:
+            A list of examples with ablated answers from the LLM.
+        """
+        example_question_key, example_answer_key = self._get_example_keys()
+
+        ablated_examples: List[Dict[str, Any]] = []
+        for i, example in enumerate(self.examples):
+            ablated_prompt = self._create_ablated_prompt(i)
+            question = example[example_question_key]
+            ablated_answer = self._invoke_llm(ablated_prompt, question)
+
+            # Create new example with ablated answer
+            ablated_example = dict(example)
+            ablated_example[example_answer_key] = ablated_answer
+            ablated_examples.append(ablated_example)
+
+        return ablated_examples
 
 
 __all__ = ["ExemplarValidator"]
