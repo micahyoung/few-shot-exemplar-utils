@@ -26,7 +26,7 @@ examples = [
     },
     {
         "question": "Who was older at death, Elvis Presley or Michael Jackson?",
-        "answer": "Elvis Presley 🇺🇸: 75 years old",  # wrong age - Elvis died at 42
+        "answer": "Elvis Presley 🇺🇸: 75 years old",  # wrong - Elvis died at 42, Michael at 50
     },
 ]
 
