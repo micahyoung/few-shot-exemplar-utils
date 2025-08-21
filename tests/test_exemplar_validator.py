@@ -172,3 +172,56 @@ def test_replayed_examples_returns_corrected_examples():
     assert len(replayed) == 2
     assert replayed[0]["answer"] == "Muhammad Ali (74)"
     assert replayed[1]["answer"] == "Tina Turner (83)"
+
+
+def test_ablation_examples_returns_ablated_examples():
+    examples = [
+        {
+            "question": "Who lived longer, Muhammad Ali or Alan Turing?",
+            "answer": "Muhammad Ali (74)",
+        },
+        {
+            "question": "Who lived longer, Tina Turner or Ruby Turner?",
+            "answer": "Ruby Turner (65)",
+        },
+    ]
+    example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
+    prompt = FewShotPromptTemplate(
+        examples=examples,
+        example_prompt=example_prompt,
+        suffix="Question: {input}",
+        input_variables=["input"],
+    )
+
+    def mock_llm_func(prompt_input):
+        class MockResponse:
+            def __init__(self, content):
+                self.content = content
+
+        # Get text from prompt input
+        text = (
+            prompt_input.text
+            if hasattr(prompt_input, "text")
+            else prompt_input.get("input", "")
+        )
+        last_question = text.split("\n")[-1]
+
+        # Simulate ablation effect: without the specific example, answer changes
+        if "Tina Turner or Ruby Turner" in last_question:
+            # Without the Ruby Turner example in context, model gives different answer
+            if "Ruby Turner (65)" not in text:
+                return MockResponse("Tina Turner (83)")
+            else:
+                return MockResponse("Ruby Turner (65)")
+        else:
+            # Without the Ali example in context, still gets it right (less dependency)
+            return MockResponse("Muhammad Ali (74)")
+
+    validator = ExemplarValidator(prompt, mock_llm_func)
+    ablated = validator.ablation_examples()
+
+    assert len(ablated) == 2
+    # First example: when removed from context, still gets same answer
+    assert ablated[0]["answer"] == "Muhammad Ali (74)"
+    # Second example: when removed from context, gets different answer
+    assert ablated[1]["answer"] == "Tina Turner (83)"
