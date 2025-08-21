@@ -18,7 +18,15 @@ examples = [
     },
     {
         "question": "Who lived longer, Marianne Faithfull or Tina Turner?",
-        "answer": "Tina Turner 🇺🇸: 100 years old",  # wrong age for demo
+        "answer": "Tina Turner 🇺🇸: 100 years old",  # wrong - Tina died at 83
+    },
+    {
+        "question": "Who died first, John Lennon or George Harrison?",
+        "answer": "George Harrison 🇬🇧: 58 years old",  # wrong - Lennon died first
+    },
+    {
+        "question": "Who was older at death, Elvis Presley or Michael Jackson?",
+        "answer": "Elvis Presley 🇺🇸: 75 years old",  # wrong age - Elvis died at 42
     },
 ]
 
