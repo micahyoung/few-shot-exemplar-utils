@@ -1,5 +1,9 @@
 # Few-Shot Prompt Exemplar Utilities
 
+Optimize your few-shot prompt exemplars for consistency and conformance with LLM base knowledge.
+
+## About Few-Shot Exemplars
+
 Few-shot LLM prompts using curated exemplars is a powerful prompt-engineering technique to elicit consistent, desirable behavior from LLMs, allowing users to define style, substance, intent, knowledge, and boundaries using only intuitive examples and counter-examples. The structure of few-shot examples strongly aligns with labeled LLM training data, giving powerful post-training control without fine-tuning. Outside LLM context, exemplars serve as ground-truth, integration testing hooks, RAG retrieval context, and potentially training data.
 
 The goal of these tools are to simplify operationalizing these techniques with common libraries and use-cases.
