@@ -30,7 +30,7 @@ This MCP [Model Context Protocol](https://modelcontextprotocol.io/llms.txt) impl
         }
     }
     ```
-2. Register your prompts and exemplars like this:
+1. Register your prompts and exemplars  with a Chat message like:
 
     ```text
     few-shot-exemplars:
@@ -49,12 +49,18 @@ This MCP [Model Context Protocol](https://modelcontextprotocol.io/llms.txt) impl
     A: Tina Turner 🇺🇸: 100 years old
     ```
 
-3. Ask a novel question:
+1. Correct any un-replayable questions:
+    ```diff
+    -Tina Turner 🇺🇸: 100 years old
+    +Tina Turner 🇺🇸: 83 years old
+    ```
+
+1. Ask a novel question:
     ```text
     Q: Who lived longer, Louis Armstrong or Ella Fitzgerald?
     ```
 
-4. Load the prompt then ask a new question ([VS Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_use-mcp-prompts))
+1. (Optional) Load the prompt then ask a new question ([VS Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_use-mcp-prompts))
 
 ## Langchain `ExemplarValidator`
 
