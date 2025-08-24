@@ -10,6 +10,52 @@ The goal of these tools are to simplify operationalizing these techniques with c
 pip install few-shot-exemplar-utils
 ```
 
+## MCP Server
+
+This MCP [Model Context Protocol](https://modelcontextprotocol.io/llms.txt) implementation demonstrates direct curation and consumtion of exemplars through LLM-native interface, using [sampling](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) and [prompts](https://modelcontextprotocol.io/specification/2025-06-18/server/prompts).
+
+### Usage
+
+1. Configure and activate the MCP via config:
+    ```json
+    {
+        "servers": {
+            "few-shot-exemplars": {
+                "type": "stdio",
+                "command": ".venv/bin/python",
+                "args": [
+                    "./few_shot_exemplars/mcp_server.py"
+                ]
+            }
+        }
+    }
+    ```
+2. Register your prompts and exemplars like this:
+
+    ```text
+    few-shot-exemplars:
+
+    add a new prompt:
+    > Return your best guess, name/flag/age, without explanation
+
+    then, add each of these exemplars:
+    Q: Who died younger, Muhammad Ali or Alan Turing?
+    A: Alan Turing 🇬🇧: 41 years old
+
+    Q: Who outlived whom, Robin or Maurice Gibb?
+    A: Robin Gibb 🇬🇧: 62 years old
+
+    Q: Who lived longer, Tina Turner or Marianne Faithfull?
+    A: Tina Turner 🇺🇸: 100 years old
+    ```
+
+3. Ask a novel question:
+    ```text
+    Q: Who lived longer, Louis Armstrong or Ella Fitzgerald?
+    ```
+
+4. Load the prompt then ask a new question ([VS Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_use-mcp-prompts))
+
 ## Langchain `ExemplarValidator`
 
 ### Usage
